@@ -7,6 +7,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Class Attendance Tracker</title>
+    <!-- PWA Manifest and Theme Color -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1e293b">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
@@ -52,7 +56,7 @@
         <div class="bg-slate-800 text-white p-6 md:p-8 flex items-center justify-between">
             <div>
                 <h1 class="text-3xl md:text-4xl font-bold">AttendEASE</h1>
-                <p class="text-slate-300 mt-1">Modern Attendance Digital page</p>
+                <p class="text-slate-300 mt-1">Modern Attendance Tracking</p>
             </div>
              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-slate-500 hidden sm:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -61,12 +65,18 @@
 
         <div class="p-6 md:p-8">
             <!-- Class Details Form -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div>
                     <label for="classSelector" class="block text-sm font-medium text-gray-700 mb-1">Select Class</label>
                     <select id="classSelector" class="w-full px-4 py-2 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
                         <option value="MCA 3RD SEM">MCA 3RD SEM</option>
                         <option value="MCA 1ST SEM">MCA 1ST SEM</option>
+                    </select>
+                </div>
+                 <div>
+                    <label for="subjectSelector" class="block text-sm font-medium text-gray-700 mb-1">Select Subject</label>
+                    <select id="subjectSelector" class="w-full px-4 py-2 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                        <!-- Subject options will be populated by JS -->
                     </select>
                 </div>
                 <div>
@@ -91,40 +101,43 @@
     </main>
 
     <script>
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('ServiceWorker registration failed: ', error);
+                    });
+            });
+        }
+    
         document.addEventListener('DOMContentLoaded', () => {
             const studentList = document.getElementById('studentList');
             const submitAttendanceBtn = document.getElementById('submitAttendanceBtn');
             const classSelector = document.getElementById('classSelector');
+            const subjectSelector = document.getElementById('subjectSelector');
             const attendanceDateInput = document.getElementById('attendanceDate');
             const emptyState = document.getElementById('empty-state');
 
             let studentCount = 0;
 
-            // Set today's date by default
             const today = new Date();
             const year = today.getFullYear();
             const month = String(today.getMonth() + 1).padStart(2, '0');
             const day = String(today.getDate()).padStart(2, '0');
             attendanceDateInput.value = `${year}-${month}-${day}`;
             
-            // Student Data
-            const students3rdSem = {
-                "ALOK NEGI": 2405001, "AMAN POKHRIYAL": 2405002, "ANAS SAIFI": 2405003, "ANJALI GUSAIN": 2405004, "ANJALI PATWAL": 2405005,
-                "ASMIT BHATT": 2405006, "AYUSH MAURYA": 2405007, "AYUSH RAWAT": 2405008, "CHIRAG KASHYAP": 2405009, "DEVENDRA SINGH RANA": 2405010,
-                "DIKSHA PHARTYAL": 2405011, "KAMAL SINGH BISHT": 2405012, "KRISHNA BHATT": 2405013, "MANSI SAINI": 2405014, "MANVI UNIYAL": 2405015,
-                "NEERAJ JOSHI": 2405016, "PRIYANSHU BHATT": 2405017, "PRIYANSHU DHYANI": 2405018, "SEJAL SINGH": 2405019, "SHARAD NIJWALA": 2405020,
-                "SHIKHA": 2405021, "SHIVANI BHATT": 2405022, "SHRIYANSHU DHYANI": 2405023, "SIDDHARTH PATWAL": 2405024, "SURAJ SINGH BISHT": 2405025
+            const students3rdSem = { "ALOK NEGI": 2405001, "AMAN POKHRIYAL": 2405002, "ANAS SAIFI": 2405003, "ANJALI GUSAIN": 2405004, "ANJALI PATWAL": 2405005, "ASMIT BHATT": 2405006, "AYUSH MAURYA": 2405007, "AYUSH RAWAT": 2405008, "CHIRAG KASHYAP": 2405009, "DEVENDRA SINGH RANA": 2405010, "DIKSHA PHARTYAL": 2405011, "KAMAL SINGH BISHT": 2405012, "KRISHNA BHATT": 2405013, "MANSI SAINI": 2405014, "MANVI UNIYAL": 2405015, "NEERAJ JOSHI": 2405016, "PRIYANSHU BHATT": 2405017, "PRIYANSHU DHYANI": 2405018, "SEJAL SINGH": 2405019, "SHARAD NIJWALA": 2405020, "SHIKHA": 2405021, "SHIVANI BHATT": 2405022, "SHRIYANSHU DHYANI": 2405023, "SIDDHARTH PATWAL": 2405024, "SURAJ SINGH BISHT": 2405025 };
+            const students1stSem = { "ABHISHEK RAWAT": 2505001, "ABHISHEK SINGH NAYAL": 2505002, "ASHOK CHANDRA UPRETI": 2505003, "AYUSH SINGH RAWAT": 2505004, "DEEPAK BISHT": 2505005, "DEVASHISH TIWARI": 2505006, "DIVESH PANT": 2505007, "KHUSHI DWIVEDI": 2505008, "KIRAN SAHANI": 2505009, "NIKITA BALODHI": 2505010, "NISHTHA ARORA": 2505011, "OJASWEE BISHT": 2505012, "RATNESH JUYAL": 2505013, "REETU SAINI": 2505014, "RISHABH KAINTURA": 2505015, "ROHIT SINGH": 2505016, "SAURAV DHAPOLA": 2505017, "SHIVANK RAWAT": 2505018, "SIMRAN KANDARI": 2505019, "VIVEK": 2505020 };
+
+            const subjects = {
+                "MCA 3RD SEM": ["Big Data Analysis", "Entrepreneurship", "Minor Project", "Seminar", "Graph Theory", "Universal Human Values"],
+                "MCA 1ST SEM": ["Computer Organization", "Python Programming", "Discrete Mathematics", "Operating System", "Technical Communication Skills", "Web Technology (Bridge)", "Programming in C (Bridge)", "Information Technology (Bridge)"]
             };
 
-            const students1stSem = {
-                "ABHISHEK RAWAT": 2505001, "ABHISHEK SINGH NAYAL": 2505002, "ASHOK CHANDRA UPRETI": 2505003, "AYUSH SINGH RAWAT": 2505004,
-                "DEEPAK BISHT": 2505005, "DEVASHISH TIWARI": 2505006, "DIVESH PANT": 2505007, "KHUSHI DWIVEDI": 2505008,
-                "KIRAN SAHANI": 2505009, "NIKITA BALODHI": 2505010, "NISHTHA ARORA": 2505011, "OJASWEE BISHT": 2505012,
-                "RATNESH JUYAL": 2505013, "REETU SAINI": 2505014, "RISHABH KAINTURA": 2505015, "ROHIT SINGH": 2505016,
-                "SAURAV DHAPOLA": 2505017, "SHIVANK RAWAT": 2505018, "SIMRAN KANDARI": 2505019, "VIVEK": 2505020
-            };
-
-            // Function to add a single student row to the DOM
             const addStudent = (name, id) => {
                 studentCount++;
                 const studentId = `student-${Date.now()}-${studentCount}`; 
@@ -150,43 +163,48 @@
                 studentList.appendChild(studentRow);
             };
             
-            // Function to render the list based on selected class
             const renderStudentList = (selectedClass) => {
-                studentList.innerHTML = ''; // Clear the list
-                studentCount = 0; // Reset counter
-                let studentsToRender;
-
-                if (selectedClass === "MCA 3RD SEM") {
-                    studentsToRender = students3rdSem;
-                } else if (selectedClass === "MCA 1ST SEM") {
-                    studentsToRender = students1stSem;
-                }
-
+                studentList.innerHTML = '';
+                studentCount = 0;
+                let studentsToRender = selectedClass === "MCA 3RD SEM" ? students3rdSem : students1stSem;
                 if (studentsToRender && Object.keys(studentsToRender).length > 0) {
-                     if(emptyState) emptyState.style.display = 'none';
-                    for (const [name, id] of Object.entries(studentsToRender)) {
-                        addStudent(name, id);
-                    }
+                    if(emptyState) emptyState.style.display = 'none';
+                    for (const [name, id] of Object.entries(studentsToRender)) { addStudent(name, id); }
                 } else {
                     if(emptyState) emptyState.style.display = 'block';
                 }
             };
+
+            const renderSubjectList = (selectedClass) => {
+                subjectSelector.innerHTML = '';
+                const subjectList = subjects[selectedClass] || [];
+                subjectList.forEach(subject => {
+                    const option = document.createElement('option');
+                    option.value = subject;
+                    option.textContent = subject;
+                    subjectSelector.appendChild(option);
+                });
+            };
             
-            // Event listener for class selection change
             classSelector.addEventListener('change', (e) => {
                 renderStudentList(e.target.value);
+                renderSubjectList(e.target.value);
             });
             
             // Initial render on page load
             renderStudentList(classSelector.value);
+            renderSubjectList(classSelector.value);
 
-            // Function to generate and download the PDF
             submitAttendanceBtn.addEventListener('click', () => {
                 const className = classSelector.value;
+                const subjectName = subjectSelector.value;
                 const attendanceDate = attendanceDateInput.value;
 
+                if (!subjectName) {
+                    alert('Please select a subject.');
+                    return;
+                }
                 if (studentList.querySelectorAll('.student-row').length === 0) {
-                    // Using a custom modal/alert in a real app would be better
                     alert('There are no students in the list.');
                     return;
                 }
@@ -196,15 +214,14 @@
                 
                 const reportTime = new Date().toLocaleTimeString();
                 
-                // Add header
                 doc.setFontSize(20);
                 doc.text('Attendance Report', 14, 22);
                 doc.setFontSize(12);
                 doc.text(`Class: ${className}`, 14, 32);
-                doc.text(`Date: ${new Date(attendanceDate).toLocaleDateString()}`, 14, 40);
-                doc.text(`Time Generated: ${reportTime}`, 14, 48);
+                doc.text(`Subject: ${subjectName}`, 14, 40);
+                doc.text(`Date: ${new Date(attendanceDate).toLocaleDateString()}`, 14, 48);
+                doc.text(`Time Generated: ${reportTime}`, 14, 56);
 
-                // Prepare table data
                 const tableHead = [['S.No.', 'Institute ID', 'Student Name', 'Status']];
                 const tableBody = [];
                 const studentRows = studentList.querySelectorAll('.student-row');
@@ -222,16 +239,14 @@
                     else if (status === 'Leave') leaveCount++;
                 });
 
-                // Add table to PDF
                 doc.autoTable({
                     head: tableHead,
                     body: tableBody,
-                    startY: 60,
+                    startY: 68,
                     theme: 'grid',
                     headStyles: { fillColor: [30, 41, 59] }, // slate-800
                 });
 
-                // Add summary
                 let finalY = doc.autoTable.previous.finalY;
                 doc.setFontSize(14);
                 doc.text('Summary', 14, finalY + 15);
@@ -244,15 +259,12 @@
                 doc.setTextColor(249, 115, 22); // orange-500
                 doc.text(`On Leave: ${leaveCount}`, 14, finalY + 43);
                 
-                // Reset color
                 doc.setTextColor(0, 0, 0);
 
-                // Save the PDF
-                doc.save(`Attendance_${className.replace(/\s/g, '_')}_${attendanceDate}.pdf`);
+                doc.save(`Attendance_${className.replace(/\s/g, '_')}_${subjectName.replace(/\s/g, '_')}_${attendanceDate}.pdf`);
             });
         });
     </script>
 </body>
 </html>
-
 
