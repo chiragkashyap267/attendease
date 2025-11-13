@@ -57,7 +57,6 @@
             <div>
                 <h1 class="text-3xl md:text-4xl font-bold">AttendEASE</h1>
                 <p class="text-slate-300 mt-1">Modern Attendance Tracking</p>
-                <p>by chirag kashyap rajput </p>
             </div>
              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-slate-500 hidden sm:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -135,8 +134,25 @@
             const students1stSem = { "ABHISHEK RAWAT": 2505001, "ABHISHEK SINGH NAYAL": 2505002, "ASHOK CHANDRA UPRETI": 2505003, "AYUSH SINGH RAWAT": 2505004, "DEEPAK BISHT": 2505005, "DEVASHISH TIWARI": 2505006, "DIVESH PANT": 2505007, "KHUSHI DWIVEDI": 2505008, "KIRAN SAHANI": 2505009, "NIKITA BALODHI": 2505010, "NISHTHA ARORA": 2505011, "OJASWEE BISHT": 2505012, "RATNESH JUYAL": 2505013, "REETU SAINI": 2505014, "RISHABH KAINTURA": 2505015, "ROHIT SINGH": 2505016, "SAURAV DHAPOLA": 2505017, "SHIVANK RAWAT": 2505018, "SIMRAN KANDARI": 2505019, "VIVEK": 2505020 };
 
             const subjects = {
-                "MCA 3RD SEM": ["Big Data Analysis", "Entrepreneurship", "Minor Project", "Seminar", "Graph Theory", "Universal Human Values"],
-                "MCA 1ST SEM": ["Computer Organization", "Python Programming", "Discrete Mathematics", "Operating System", "Technical Communication Skills", "Web Technology (Bridge)", "Programming in C (Bridge)", "Information Technology (Bridge)"]
+                "MCA 3RD SEM": [
+                    "Big Data Analysis",
+                    "Entrepreneurship",
+                    "Minor Project",
+                    "Seminar",
+                    "Graph Theory",
+                    "Universal Human Values",
+                    "Software engineering"  /* <-- Added subject as requested (exact casing) */
+                ],
+                "MCA 1ST SEM": [
+                    "Computer Organization",
+                    "Python Programming",
+                    "Discrete Mathematics",
+                    "Operating System",
+                    "Technical Communication Skills",
+                    "Web Technology (Bridge)",
+                    "Programming in C (Bridge)",
+                    "Information Technology (Bridge)"
+                ]
             };
 
             const addStudent = (name, id) => {
@@ -268,5 +284,3 @@
     </script>
 </body>
 </html>
-
-
